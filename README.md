@@ -1,7 +1,7 @@
 # csirt-lab (CSIRT Lab Setup)
 
 A dockerized CSIRT lab environment that bundles the core services needed for incident handling, collaboration, and IOC triage.  
-This repository brings together **RTIR**, **Mattermost**, **email + webmail**, and a few helper tools to quickly spin up a realistic workflow for training, demos, development and internal testing.
+This repository brings together **RTIR**, **Mattermost**, **email + webmail**, **Postgres**, and a few helper tools to quickly spin up a realistic workflow for training, demos, development and internal testing.
 
 
 ## What’s included
@@ -42,6 +42,11 @@ Email services are provided using **docker-email** to simulate a realistic inbou
 
 - **Role in the lab:** IOC lookups without sending real indicators to external services.
 - **Behavior:** users can search an IOC (hash/domain/IP/URL), and FakeTotal returns a **rating/reputation** for that IOC.
+
+### Postgres
+
+**Postgres** is the database backend used by the stack - RTIR, Mattermost, FakeTotal\
+It provides persistent storage for lab data and can be inspected using Adminer.
 
 ## Typical workflow (example)
 1. A report arrives via **Email / Roundcube**.
