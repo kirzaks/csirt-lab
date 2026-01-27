@@ -1,0 +1,260 @@
+services:
+  postgres:
+    image: postgres:18-alpine3.22
+    restart: unless-stopped
+    pids_limit: 100
+    container_name: postgres
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      TZ: UTC
+      POSTGRES_USER: $PG_USER
+      POSTGRES_PASSWORD: $PG_PASS
+      POSTGRES_DB: mattermost
+    ports:
+      - "5432:5432"
+    depends_on:
+      initme:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", $PG_USER, "-d", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lab-net
+
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0
+    container_name: mailserver
+    hostname: mail.${INITDOMAIN}
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - dms_mail_data:/var/mail/
+      - main_config:/tmp/docker-mailserver/
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ENABLE_RSPAMD=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_FAIL2BAN=0
+      - ENABLE_SUBMISSION=1
+      - ENABLE_POLICYD_SPF=0
+      - SSL_TYPE=self-signed
+      - LOG_LEVEL=warn
+      - SUPERVISOR_LOGLEVEL=warn
+    networks:
+      lab-net:
+        aliases:
+          - mail.${INITDOMAIN}
+    restart: always
+    depends_on:
+      initme:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "ss -lnt4 | grep -q ':993' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+
+  roundcube:
+    image: roundcube/roundcubemail:1.6.12-apache
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://mail.${INITDOMAIN}
+      - ROUNDCUBEMAIL_DEFAULT_PORT=993
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://mail.${INITDOMAIN}
+      - ROUNDCUBEMAIL_SMTP_PORT=587
+      - ROUNDCUBEMAIL_USERNAME_DOMAIN=${INITDOMAIN}
+    container_name: roundcube
+    hostname: webmail.${INITDOMAIN}
+    domainname: ${INITDOMAIN}
+      
+    ports:
+      - "8082:80"
+    volumes:
+      - ./roundcube/post_action.sh:/entrypoint-tasks/pre-setup/post_action.sh:ro
+      - main_config:/data
+    networks:
+      - lab-net
+
+  initme:
+    image: ubuntu
+    volumes:
+      - ./initme:/tmpdata
+      - main_config:/data
+      - ./initme/entrypoint.sh:/app/entrypoint.sh:ro
+    environment:
+      - INITDOMAIN=${INITDOMAIN}
+      - GLOBAL_PASS=${GLOBAL_PASS}
+    entrypoint: "/bin/bash /app/entrypoint.sh"
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /data/ready ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+    networks:
+      - lab-net    
+
+  rtir:
+    image: kirzaks/rtir:1.0
+    hostname: rtir.${INITDOMAIN}
+    domainname: ${INITDOMAIN}
+    container_name: rtir
+
+    ports:
+      - "80:80"
+
+    environment:
+      - INITDOMAIN=${INITDOMAIN}
+    
+    volumes:
+      - main_config:/data
+      - ./rtir/entrypoint.sh:/app/entrypoint.sh:ro
+
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    networks:
+      - lab-net        
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DEFAULT_DB_DRIVER: pgsql
+    networks:
+      - lab-net
+
+  mm:
+    depends_on:
+      - mattermost
+    container_name: mm
+    image: nginx:alpine
+    restart: unless-stopped
+    pids_limit: 100
+    tmpfs:
+      - /var/run
+      - /var/cache
+      - /var/log/nginx
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+    environment:
+      - TZ=UTC
+    ports:
+      - 8083:80
+    networks:
+      - lab-net      
+
+  mattermost:
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    # 'mattermost-enterprise-edition' or 'mattermost-team-edition'
+    image: mattermost/mattermost-team-edition:11.3.0
+    restart: unless-stopped
+    pids_limit: 200
+    tmpfs:
+      - /tmp
+    volumes:
+      - mm_config:/mattermost/config
+      - mm_data:/mattermost/data
+      - mm_plugins:/mattermost/plugins
+      - mm_client:/mattermost/client/plugins
+
+
+    container_name: mattermost
+    hostname: mm.${INITDOMAIN}
+    environment:
+      - TZ=UTC
+      # DB
+      - MM_SQLSETTINGS_DRIVERNAME=postgres
+      - MM_SQLSETTINGS_DATASOURCE=postgres://${PG_USER}:${PG_PASS}@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
+      - MM_BLEVESETTINGS_INDEXDIR=/mattermost/bleve-indexes
+
+      # additional settings
+      - MM_PLUGINSETTINGS_ENABLE=false
+      - MM_SERVICESETTINGS_SITEURL=http://localhost:8083
+      - MM_SERVICESETTINGS_EnableBotAccountCreation=true
+      - MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS=true
+      - MM_NOTIFICATIONLOGSETTINGS_CONSOLELEVEL=warn
+
+      # Mail
+      - MM_EMAILSETTINGS_SMTPSERVER=mail.${INITDOMAIN}
+      - MM_EMAILSETTINGS_SMTPPORT=587
+      - MM_EMAILSETTINGS_CONNECTIONSECURITY=STARTTLS
+      - MM_EMAILSETTINGS_ENABLESMTPAUTH=true
+      - MM_EMAILSETTINGS_SMTPUSERNAME=mm@${INITDOMAIN}
+      - MM_EMAILSETTINGS_SMTPPASSWORD=$GLOBAL_PASS
+      - MM_EMAILSETTINGS_SKIPSERVERCERTIFICATEVERIFICATION=true
+      - MM_EMAILSETTINGS_FEEDBACKEMAIL=mm@${INITDOMAIN}
+      - MM_EMAILSETTINGS_FEEDBACKNAME='Best Org 4ever'
+      - MM_SUPPORTSETTINGS_SUPPORTEMAIL=admin@${INITDOMAIN}
+
+    ports:
+      - 8443:8443/udp
+      - 8443:8443/tcp
+    networks:
+      - lab-net
+
+  myhost:
+    image: python:3.14.2
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    volumes:
+      - ./myhost:/app
+    container_name: myhost
+    hostname: myhost.${INITDOMAIN}
+    entrypoint: "/bin/bash /app/init/entrypoint.sh"
+    networks:
+      - lab-net
+
+  faketotal:
+    image: python:3.14.2
+    depends_on:
+      mailserver:
+        condition: service_healthy
+    entrypoint: "/bin/bash /data/files/entrypoint.sh"
+    volumes:
+      - ./faketotal:/data
+    networks:
+      - lab-net
+    ports:
+      - 8080:8080
+   
+    
+
+volumes:
+  main_config:
+  pgdata:
+  dms_mail_data:
+  mm_pg:
+  mm_config:
+  mm_data:
+  mm_plugins:
+  mm_client:
+
+networks:
+  lab-net:
+    name: lab-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.0.0/24
+          gateway: 172.50.0.1
