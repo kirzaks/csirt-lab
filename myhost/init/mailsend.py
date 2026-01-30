@@ -1,7 +1,7 @@
 import smtplib
-import re
 import datetime
 import argparse
+import os
 from email.utils import format_datetime
 from email.message import EmailMessage
 
@@ -10,8 +10,7 @@ class SendMail:
         self.subject = subject
         self.body = body
 
-        env_obj = open("../../.env", "r").read()
-        domain = re.search(r"INITDOMAIN=(.+)", env_obj).group(1)
+        domain = os.environ["INITDOMAIN"]
         self.rcpto = f"rtir@{domain}"
 
         if fakemail:
@@ -38,7 +37,7 @@ class SendMail:
         msg.set_content(self.body)
 
         try:
-            s = smtplib.SMTP('localhost')
+            s = smtplib.SMTP('mailserver')
         except ConnectionRefusedError as err:
             print("SMTP Error", err)
             return None

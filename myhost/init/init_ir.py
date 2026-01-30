@@ -20,17 +20,17 @@ badspam = []
 class RTIR:
     def __init__(self, user_id, ir_id):
         handlers = {
-            0: "1-44-8cf8bf2a7c10b4c577d28859d0285097",
-            1: "1-46-f9f57ed53704d1fc40c10d3fd5cbc90a",
-            2: "1-48-cb13ad93c0355f1867b545cd511c71f4",
-            3: "1-14-4df61206d6162e9bd8039eb55eb4e2e9"
+            0: "1-44-1492646061d86b36633f0292795caa79",
+            1: "1-46-1d0449927b47458566cabcc31682185b",
+            2: "1-48-b84d33c5e9671bfdb5d4c09fe02b395e",
+            3: "1-14-15936562526ceec3d4d788e66540c3df"
         }
         self.user_token = handlers[user_id]
         self.ticket_id = ir_id
         self.incident_id = None
 
     def send_req(self, method, url, data=None):
-        base_url = "http://localhost/REST/2.0/"
+        base_url = "http://rtir/REST/2.0/"
         headers = {"Content-Type": "application/json",
                    "Authorization": f"token {self.user_token}"}
 
@@ -116,7 +116,12 @@ for i in incidents:
     actions = i.get("actions")
     if not actions:
         continue
-    ticket_id = cur.execute("SELECT id from tickets where subject = %s ORDER BY id LIMIT 1", (i["subject"],)).fetchone()[0]
+    ticket_id = cur.execute("SELECT id from tickets where subject = %s ORDER BY id LIMIT 1", (i["subject"],)).fetchone()
+    if not ticket_id:
+        print("No event found in DB...")
+        continue
+    ticket_id=ticket_id[0]
+
     rtir = RTIR(user_id=actions.get("user"), ir_id=ticket_id)
 
 

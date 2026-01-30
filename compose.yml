@@ -4,6 +4,7 @@ services:
     restart: unless-stopped
     pids_limit: 100
     container_name: postgres
+    hostname: pg.${INITDOMAIN}
     tmpfs:
       - /tmp
       - /var/run/postgresql
@@ -135,6 +136,8 @@ services:
     restart: always
     ports:
       - 8081:8080
+    container_name: adminer
+    hostname: adminer.${INITDOMAIN}
     environment:
       ADMINER_DEFAULT_SERVER: postgres
       ADMINER_DEFAULT_DB_DRIVER: pgsql
@@ -221,6 +224,8 @@ services:
       - ./myhost:/app
     container_name: myhost
     hostname: myhost.${INITDOMAIN}
+    environment:
+      - INITDOMAIN=${INITDOMAIN}
     entrypoint: "/bin/bash /app/init/entrypoint.sh"
     networks:
       - lab-net
@@ -231,6 +236,8 @@ services:
       mailserver:
         condition: service_healthy
     entrypoint: "/bin/bash /data/files/entrypoint.sh"
+    container_name: faketotal
+    hostname: faketotal.${INITDOMAIN}
     volumes:
       - ./faketotal:/data
     networks:

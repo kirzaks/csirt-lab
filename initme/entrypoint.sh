@@ -37,7 +37,7 @@ if [[ -n "$INITDOMAIN" ]]; then
     done
 else
     echo "WARNING: The 'INITDOMAIN' environment variable is not set. Please set the 'INITDOMAIN' Docker environment variable of your hostname(s)."
-    echo " Example: INITDOMAIN='example.local'"
+    echo " Example: INITDOMAIN='example.test'"
     exit 1
 fi
 
@@ -55,32 +55,31 @@ else
 fi
 
 # Mail users
-
 if [[ ! -f /data/postfix-accounts.cf ]]; then
-for i in \
-    "rtir@$INITDOMAIN:$GLOBAL_PASS" \
-    "admin@$INITDOMAIN:$GLOBAL_PASS" \
-    "tony@$INITDOMAIN:$GLOBAL_PASS" \
-    "yoda@$INITDOMAIN:$GLOBAL_PASS" \
-    "joker@$INITDOMAIN:$GLOBAL_PASS" \
-    "hr@$INITDOMAIN:$GLOBAL_PASS" \
-    "mm@$INITDOMAIN:$GLOBAL_PASS" \
-    "gov@gov.local:$GLOBAL_PASS" \
-    "admin@gov.local:$GLOBAL_PASS"
-do
-    echo "$(echo $i | cut -d: -f1)|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $(echo $i | cut -d: -f2))" >> /data/postfix-accounts.cf
-done
-fi
-
-# Random ticketing users
-for i in gmail mail yahoo icloud outlook proton
-do
-    for j in admin root bot security ammy tori john casady ben martha spam
+    for i in \
+        "rtir@$INITDOMAIN:$GLOBAL_PASS" \
+        "admin@$INITDOMAIN:$GLOBAL_PASS" \
+        "tony@$INITDOMAIN:$GLOBAL_PASS" \
+        "yoda@$INITDOMAIN:$GLOBAL_PASS" \
+        "joker@$INITDOMAIN:$GLOBAL_PASS" \
+        "hr@$INITDOMAIN:$GLOBAL_PASS" \
+        "mm@$INITDOMAIN:$GLOBAL_PASS" \
+        "gov@gov.local:$GLOBAL_PASS" \
+        "admin@gov.local:$GLOBAL_PASS"
     do
-        echo "$j@$i.local|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $GLOBAL_PASS)" >> /data/postfix-accounts.cf
+        echo "$(echo $i | cut -d: -f1)|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $(echo $i | cut -d: -f2))" >> /data/postfix-accounts.cf
     done
-done
 
+
+    # Random ticketing users
+    for i in gmail mail yahoo icloud outlook proton
+    do
+        for j in admin root bot security ammy tori john casady ben martha spam
+        do
+            echo "$j@$i.local|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $GLOBAL_PASS)" >> /data/postfix-accounts.cf
+        done
+    done
+fi
 
 /bin/touch /data/ready
 echo "Sleep to be healty :)"
