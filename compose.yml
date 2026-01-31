@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18-alpine3.22
+    image: postgres:${POSTGRES_RELEASE}
     restart: unless-stopped
     pids_limit: 100
     container_name: postgres
@@ -29,7 +29,7 @@ services:
       - lab-net
 
   mailserver:
-    image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0
+    image: ghcr.io/docker-mailserver/docker-mailserver:${DOCKER_MAILSERVER_RELEASE}
     container_name: mailserver
     hostname: mail.${INITDOMAIN}
     ports:
@@ -69,7 +69,7 @@ services:
 
 
   roundcube:
-    image: roundcube/roundcubemail:1.6.12-apache
+    image: roundcube/roundcubemail:${ROUNDCUBE_RELEASE}
     depends_on:
       mailserver:
         condition: service_healthy
@@ -92,7 +92,7 @@ services:
       - lab-net
 
   initme:
-    image: ubuntu
+    image: ubuntu:${UBUNTU_RELEASE}
     volumes:
       - ./initme:/tmpdata
       - main_config:/data
@@ -100,6 +100,8 @@ services:
     environment:
       - INITDOMAIN=${INITDOMAIN}
       - GLOBAL_PASS=${GLOBAL_PASS}
+      - PG_USER
+      - PG_PASS
     entrypoint: "/bin/bash /app/entrypoint.sh"
     healthcheck:
       test: ["CMD-SHELL", "[ -f /data/ready ]"]
@@ -110,7 +112,7 @@ services:
       - lab-net    
 
   rtir:
-    image: kirzaks/rtir:1.0
+    image: kirzaks/rtir:${RTIR_RELEASE}
     hostname: rtir.${INITDOMAIN}
     domainname: ${INITDOMAIN}
     container_name: rtir
@@ -120,7 +122,11 @@ services:
 
     environment:
       - INITDOMAIN=${INITDOMAIN}
-    
+      - PG_USER
+      - PG_PASS
+      - RT_VERSION
+      - RTIR_VERSION
+      - GLOBAL_PASS
     volumes:
       - main_config:/data
       - ./rtir/entrypoint.sh:/app/entrypoint.sh:ro
@@ -132,7 +138,7 @@ services:
       - lab-net        
 
   adminer:
-    image: adminer:5.4.1
+    image: adminer:${ADMINER_RELEASE}
     restart: always
     ports:
       - 8081:8080
@@ -169,7 +175,7 @@ services:
       mailserver:
         condition: service_healthy
     # 'mattermost-enterprise-edition' or 'mattermost-team-edition'
-    image: mattermost/mattermost-team-edition:11.3.0
+    image: mattermost/${MM_EDITION}:${MM_RELEASE}
     restart: unless-stopped
     pids_limit: 200
     tmpfs:
@@ -216,7 +222,7 @@ services:
       - lab-net
 
   myhost:
-    image: python:3.14.2
+    image: python:${PYTHON_RELEASE}
     depends_on:
       mailserver:
         condition: service_healthy
@@ -231,7 +237,7 @@ services:
       - lab-net
 
   faketotal:
-    image: python:3.14.2
+    image: python:${PYTHON_RELEASE}
     depends_on:
       mailserver:
         condition: service_healthy

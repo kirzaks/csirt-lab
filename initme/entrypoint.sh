@@ -1,8 +1,13 @@
 #!/bin/bash
 
+if [[ -z $INITDOMAIN || -z $GLOBAL_PASS ]]; then
+    echo "ERROR: Looks like you don't have .env file. Please copy example.env to .env"
+    exit 1
+fi
+
 apt-get update
 apt-get install -y --no-install-recommends openssl postgresql-client
-DB_URL="postgresql://root:toor@postgres:5432"
+DB_URL="postgresql://${PG_USER}:${PG_PASS}@postgres:5432"
 
 
 if [[ ! -d /data ]]; then
@@ -64,8 +69,8 @@ if [[ ! -f /data/postfix-accounts.cf ]]; then
         "joker@$INITDOMAIN:$GLOBAL_PASS" \
         "hr@$INITDOMAIN:$GLOBAL_PASS" \
         "mm@$INITDOMAIN:$GLOBAL_PASS" \
-        "gov@gov.local:$GLOBAL_PASS" \
-        "admin@gov.local:$GLOBAL_PASS"
+        "gov@gov.test:$GLOBAL_PASS" \
+        "admin@gov.test:$GLOBAL_PASS"
     do
         echo "$(echo $i | cut -d: -f1)|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $(echo $i | cut -d: -f2))" >> /data/postfix-accounts.cf
     done
@@ -76,7 +81,7 @@ if [[ ! -f /data/postfix-accounts.cf ]]; then
     do
         for j in admin root bot security ammy tori john casady ben martha spam
         do
-            echo "$j@$i.local|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $GLOBAL_PASS)" >> /data/postfix-accounts.cf
+            echo "$j@$i.test|{SHA512-CRYPT}$(openssl passwd -6 -salt $(tr -dc 'A-Za-z0-9./' </dev/urandom | head -c 16) -password $GLOBAL_PASS)" >> /data/postfix-accounts.cf
         done
     done
 fi

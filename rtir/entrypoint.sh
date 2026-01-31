@@ -3,7 +3,7 @@
 set -e
 
 
-DB_URL="postgresql://root:toor@postgres:5432/rt6"
+DB_URL="postgresql://${PG_USER}:${PG_PASS}@postgres:5432/rt6"
 FILE="/data/ssl/demoCA/cacert.crt"
 
 # Fetchmail config
@@ -17,10 +17,10 @@ cat <<EOF > /etc/fetchmailrc
 set daemon 20
 
 poll mail.$INITDOMAIN proto IMAP port 993
-  user "rtir@$INITDOMAIN" password "password"
+  user "rtir@$INITDOMAIN" password "${GLOBAL_PASS}"
   ssl
   folder "Inbox"
-  mda "/opt/rt6/bin/rt-mailgate --queue 'Incident Reports' --action correspond --url http://rtir.$INITDOMAIN/"
+  mda "/opt/rt6/bin/rt-mailgate --queue 'Incident Reports' --action correspond --url http://rtir/"
   no keep
 EOF
 chmod 700 /etc/fetchmailrc
@@ -39,7 +39,7 @@ logfile        /var/log/msmtp.log
 host           mail.$INITDOMAIN
 from           rtir@$INITDOMAIN
 user           rtir@$INITDOMAIN
-password       password
+password       $GLOBAL_PASS
 EOF
 fi
 
@@ -75,10 +75,10 @@ Plugin('RT::IR');
 
 Set(\$DatabaseHost, 'postgres');
 Set(\$DatabaseName, 'rt6');
-Set(\$DatabasePassword, 'toor');
+Set(\$DatabasePassword, '${PG_PASS}');
 Set(\$DatabasePort, 5432);
 Set(\$DatabaseType, 'Pg');
-Set(\$DatabaseUser, 'root');
+Set(\$DatabaseUser, '${PG_USER}');
 Set(\$WebPort, 80);
 Set(\$LogToFile, 'debug');
 Set(\$LogToFileNamed, 'rt6.log');
@@ -100,13 +100,13 @@ EOF
 
 # Init RT
 if ! psql $DB_URL -tAc "SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='users' LIMIT 1;" | grep -q 1; then
-  /usr/bin/perl -I/opt/rt6/local/lib -I/opt/rt6/lib  /opt/rt6/sbin/rt-setup-database --action init --dba-password toor
+  /usr/bin/perl -I/opt/rt6/local/lib -I/opt/rt6/lib  /opt/rt6/sbin/rt-setup-database --action init --dba-password $PG_PASS
 fi
 
 
 # Init RTIR
 if ! psql $DB_URL -tAc "SELECT 1 FROM queues WHERE name='Incidents' LIMIT 1;" | grep -q 1; then
-  /usr/bin/perl -I/app/rtir -I/app/rtir/lib -I/opt/rt6/local/lib -I/opt/rt6/lib /opt/rt6/sbin/rt-setup-database --action insert --datadir /app/rtir/etc --datafile /app/rtir/etc/initialdata --dba root --dba-password toor --package RT::IR --ext-version 6.0.1
+  /usr/bin/perl -I/app/rtir -I/app/rtir/lib -I/opt/rt6/local/lib -I/opt/rt6/lib /opt/rt6/sbin/rt-setup-database --action insert --datadir /app/rtir/etc --datafile /app/rtir/etc/initialdata --dba $PG_USER --dba-password $PG_PASS --package RT::IR --ext-version $RTIR_VERSION
 fi
 
 
