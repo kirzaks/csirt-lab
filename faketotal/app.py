@@ -4,6 +4,8 @@ import random
 import psycopg
 from datetime import datetime
 import json
+import os
+
 app = Flask(__name__)
 
 def generate_stat():
