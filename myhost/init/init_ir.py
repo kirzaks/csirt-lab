@@ -1,9 +1,6 @@
 from time import sleep
 from datetime import datetime
-from xmlrpc.server import resolve_dotted_attribute
-
 import requests
-
 from incidents import incidents
 from random import choice
 from mailsend import SendMail
@@ -70,7 +67,7 @@ class RTIR:
 def gen_emails(mailusers, tld):
     datalist = []
     for user in mailusers:
-        datalist.append(f"{user}@{tld}.local")
+        datalist.append(f"{user}@{tld}.test")
     return datalist
 
 def convert_timeobj(time_convert):
