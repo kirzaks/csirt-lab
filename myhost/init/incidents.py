@@ -2,7 +2,7 @@
 incidents = [
   {
     "subject": "Suspected phishing: 'Microsoft 365 password expires today'",
-    "body": "Hi CSIRT,\n\nI got an email saying my Microsoft 365 password expires today and I need to “keep my account active”. The button took me to a weird site (not Microsoft). I clicked but did NOT enter my password.\n\nCan you check if it’s phishing and let me know what to do next?\n\nhttps://the-real-microsoft.local/\n\nThanks!",
+    "body": "Hi CSIRT,\n\nI got an email saying my Microsoft 365 password expires today and I need to “keep my account active”. The button took me to a weird site (not Microsoft). I clicked but did NOT enter my password.\n\nCan you check if it’s phishing and let me know what to do next?\n\nhttps://the-real-microsoft.test/\n\nThanks!",
     "source": "user",
     "time": "2025-06-28 18:40:42",
     "actions": {
@@ -54,7 +54,7 @@ incidents = [
   },
   {
     "subject": "I can't access website",
-    "body": "Hi,\n\nI can't access web page http://definitely-not-fake-shop.local. Browser is redirecting me to some weird web page... Are you something blocking?\n\nThanks",
+    "body": "Hi,\n\nI can't access web page http://definitely-not-fake-shop.test. Browser is redirecting me to some weird web page... Are you something blocking?\n\nThanks",
     "source": "user",
     "time": "2025-08-11 22:41:11",
     "actions": {
@@ -64,7 +64,7 @@ incidents = [
   },
   {
     "subject": "🔥 You WON a $500 Gift Card! Claim in 15 minutes",
-    "body": "CONGRATS!!! Your email was selected for a $500 gift card.\nClick NOW to claim before it expires: http://bonus-reward-claim.local\n(Do not share this link)\n\nSTOP receiving? Reply with your password to unsubscribe.",
+    "body": "CONGRATS!!! Your email was selected for a $500 gift card.\nClick NOW to claim before it expires: http://bonus-reward-claim.test\n(Do not share this link)\n\nSTOP receiving? Reply with your password to unsubscribe.",
     "source": "goodspam",
     "time": "2025-04-06 21:44:04",
     "actions": {
@@ -81,7 +81,7 @@ incidents = [
   },
   {
     "subject": "DLP alert: large upload to unknown file-sharing domain",
-    "body": "DLP triggered for user taros uploading ~2.1GB to robinhood.infoshare.local over HTTPS.",
+    "body": "DLP triggered for user taros uploading ~2.1GB to robinhood.infoshare.test over HTTPS.",
     "source": "automated",
     "time": "2025-07-08 07:04:09"
   },
@@ -185,7 +185,7 @@ incidents = [
   },
   {
     "subject": "⚠️ Your mailbox storage is full (increase now)",
-    "body": "Your mailbox has exceeded storage limit.\nRe-validate to avoid suspension: http://mail-quota-update.local\n\nIT Support Team",
+    "body": "Your mailbox has exceeded storage limit.\nRe-validate to avoid suspension: http://mail-quota-update.test\n\nIT Support Team",
     "source": "goodspam",
     "time": "2025-04-10 11:53:24",
     "actions": {
@@ -242,7 +242,7 @@ incidents = [
 
   {
     "subject": "Re: Document shared with you (View now)",
-    "body": "A document has been shared with you.\nView secure document here: http://drive-share-auth.local\n\nThis link will expire soon.",
+    "body": "A document has been shared with you.\nView secure document here: http://drive-share-auth.test\n\nThis link will expire soon.",
     "source": "user",
     "time": "2025-08-17 10:52:30",
     "actions": {
@@ -264,7 +264,7 @@ incidents = [
   },
   {
 	"subject": "Your Compensation/Grant Payment.",
-    "body": "Attn: Your Compensation/Grant Payment.\n\nMy name is Mr. George McConnell, i wish to inform you you that at the recently concluded meeting with the International Monetary Fund in collaboration with The U.S. Department of the Treasury regarding global financial matters, after reviewing various unclaimed funds from some of the financial institutions your email has been selected to receive compensation/Grant funds worth of US$1,200,000.00 in the ongoing January 2026 compensation/grant programme.\n\nFor claim kindly contact Mr. Chris Washington via email (chriswashington@aliyun.local) fill and send the below information to him for verification and after verification of your information, you will be contacted with detailed information of procedures for the payment of your compensation/Grant funds.\n\n* Full Name:\n* Gender:\n* Residential address:\n* Country:\n* Direct telephone number:\n* Reference Number: IMF/USDT/010/26.\n\nRegards,\n\nMr. George McConnell.\nInternational Monetary Fund Representative",
+    "body": "Attn: Your Compensation/Grant Payment.\n\nMy name is Mr. George McConnell, i wish to inform you you that at the recently concluded meeting with the International Monetary Fund in collaboration with The U.S. Department of the Treasury regarding global financial matters, after reviewing various unclaimed funds from some of the financial institutions your email has been selected to receive compensation/Grant funds worth of US$1,200,000.00 in the ongoing January 2026 compensation/grant programme.\n\nFor claim kindly contact Mr. Chris Washington via email (chriswashington@aliyun.test) fill and send the below information to him for verification and after verification of your information, you will be contacted with detailed information of procedures for the payment of your compensation/Grant funds.\n\n* Full Name:\n* Gender:\n* Residential address:\n* Country:\n* Direct telephone number:\n* Reference Number: IMF/USDT/010/26.\n\nRegards,\n\nMr. George McConnell.\nInternational Monetary Fund Representative",
     "source": "badspam",
     "time": "2025-11-12 12:28:04"
   },
