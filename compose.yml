@@ -9,7 +9,7 @@ services:
       - /tmp
       - /var/run/postgresql
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     environment:
       TZ: UTC
       POSTGRES_USER: $PG_USER
