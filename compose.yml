@@ -112,7 +112,7 @@ services:
       - lab-net    
 
   rtir:
-    image: kirzaks/rtir:${RTIR_RELEASE}
+    image: kirzaks/rtir:${RTIR_PLATFORM}-${RTIR_VERSION}
     hostname: rtir.${INITDOMAIN}
     domainname: ${INITDOMAIN}
     container_name: rtir

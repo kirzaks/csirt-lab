@@ -15,16 +15,17 @@ ARG RT_FIX_DEPS_CMD=/usr/local/bin/cpanm
 
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl perl make build-essential ca-certificates libpq-dev libpq-dev \
-    netbase libexpat1-dev tzdata zlib1g-dev msmtp postgresql-client fetchmail w3m elinks links html2text lynx
+    netbase libexpat1-dev tzdata zlib1g-dev msmtp postgresql-client fetchmail w3m elinks links html2text lynx libdbix-searchbuilder-perl
 RUN rm -rf /var/lib/apt/lists/*
 RUN ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
 RUN dpkg-reconfigure -f noninteractive tzdata
 
 
 RUN curl -L http://cpanmin.us | perl - App::cpanminus
-RUN cpanm --self-upgrade --sudo
+RUN cpanm --self-upgrade
 RUN printf "yes\nq\n" | /usr/bin/perl -MCPAN -e shell
 RUN cpanm CSS::Inliner
+RUN cpanm Server::Starter
 
 
 
