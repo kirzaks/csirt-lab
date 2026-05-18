@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FakeTotal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favico.png') }}">
+</head>
+<body>
+    <h1 class="title">FakeTotal</h1>
+
+    <form method="GET" action="/inspect">
+        <input class="search" type="text" autofocus name="ioc" placeholder="IP, URL, hash or domain" autocomplete="off"><br>
+        <button class="searchbtn" type="submit">Search</button>
+    </form>
+
+    <br>
+{% if result.error is not none %}
+<div class="results">
+  <div class="iocdescription">{{ result.error }}</div>
+</div>
+{% endif %}
+
+
+
+{% if result and result is mapping and result.error is none %}
+<table class="results-table">
+  <tr>
+    <td>
+      <div class="rating-circle {{ result.stat_data }}" style="--arc: {{ result.round_prec }}deg">
+        <div class="circle-inner">
+          <span class="score">{{ result.rating }}</span>
+          <span class="total">/ 30</span>
+        </div>
+      </div>
+    </td>
+
+    <td class="introblock">
+      <div class="results"><span class="subm">{{ result.type }}</span>  {{ result.ioc }}</div>
+      <br><br>
+      <div class="results"><span class="subm">First submission date: </span><br>{{ result.submit }}</div>
+    </td>
+  </tr>
+</table>
+{% endif %}
+
+
+<div class="results">
+
+{% if result.malware and result.malware is mapping %}
+
+  <div class="ioctitle">Malware</div>
+  <div class="iocdescription">{{ result.malware.value }}</div>
+  
+  {% if result.malware.meta.synonyms and result.malware.meta.synonyms is iterable %}
+    <div class="ioctitle">Synonyms</div>
+    <div class="iocdescription">
+      {% for synonym in result.malware.meta.synonyms %}
+        {{ synonym }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if result.malware.description and result.malware.description is not none %}
+  <div class="ioctitle">Description</div>
+  <div class="iocdescription">{{ result.malware.description }}</div>
+  {% endif %}
+
+  <div class="ioctitle">Refs</div>
+  <div class="iocdescription">
+    <ul>
+    {% for url in result.malware.meta.refs %}
+      <li class="refs"><a href="{{ url }}">{{ url }}</a></li>
+    {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+</div>
+
+
+</body>
+</html>
