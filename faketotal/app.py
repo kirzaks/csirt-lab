@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for
 from typing import Literal
+from urllib.parse import quote, unquote
 import random
 import psycopg
 from datetime import datetime
@@ -165,8 +166,9 @@ def inspect():
 
     if not ioc:
         return redirect(url_for("index"))
-
-    return redirect(url_for("web", ioc=ioc))
+    
+    ioc_encoded = quote(ioc, safe="")
+    return redirect(url_for("web", ioc=ioc_encoded))
 
 
 @app.get("/web/<ioc>")
@@ -175,7 +177,7 @@ def web(ioc):
     if not ioc:
         return redirect(url_for("index"))
 
-    result = backend_stuff(ioc)
+    result = backend_stuff(unquote(ioc))
     if result["error"] is None:
         # Criteria:
         # 20% - 0
@@ -193,7 +195,7 @@ def api(ioc):
     if not ioc:
         return {redirect(url_for("index"))}
 
-    result = backend_stuff(ioc)
+    result = backend_stuff(unquote(ioc))
     return result
 
 
