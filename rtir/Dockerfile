@@ -1,13 +1,13 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 LABEL author="Armins Palms" \
-      version="1.0" \
+      version="2.0" \
       description="This image is part of the 'csirt-lab' setup (RTIR + Adminer + Mattermost + Email + Roundcube + FakeTotal)" \
       linkedin="https://www.linkedin.com/in/armins-palms/" \
       git-repo="https://github.com/kirzaks/csirt-lab"
 
-ARG RT=rt-6.0.2
-ARG RTIR=RT-IR-6.0.1
+ARG RT=rt-6.0.3
+ARG RTIR=RT-IR-6.0.3
 
 
 ARG DEBIAN_FRONTEND=noninteractive
